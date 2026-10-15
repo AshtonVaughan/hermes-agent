@@ -1,0 +1,34 @@
+name: jev
+version: 0.1.0
+manifest_version: 2
+api_version: 1
+license: MIT
+description: "TypeSafe Jev as Hermes's decision layer: picks at most one skill per turn, decides how hard DeepSeek should think, and silently blocks tool calls that don't match what the user asked for. Never prompts the user; every Jev failure falls back to stock Hermes behavior."
+author: AshtonVaughan
+homepage: https://docs.typesafe.ai
+tags: [decision, routing, deepseek, typesafe]
+provides_hooks:
+  - pre_llm_call
+  - pre_tool_call
+requires_env:
+  - name: TYPESAFE_API_KEY
+    description: "TypeSafe API key for Jev"
+    url: "https://console.typesafe.ai/"
+    secret: true
+python_dependencies:
+  - "typesafe-sdk>=0.7,<0.8"
+config_schema:
+  jev_model: {type: str, default: "jev-latest", description: "Jev model id or alias (pin e.g. jev-1.14.0 to freeze thresholds)"}
+  timeout: {type: float, default: 4.0, description: "Seconds per Jev request before falling back to stock behavior"}
+  skill_suggest: {type: bool, default: true, description: "Suggest at most one skill per turn"}
+  skill_gate: {type: float, default: 0.30, description: "Min mean of the three 'needs a skill' nouls before ranking skills"}
+  skill_fit: {type: float, default: 0.30, description: "Min 'does this skill fit' noul for the winning skill"}
+  reasoning_gate: {type: bool, default: true, description: "Let Jev switch DeepSeek thinking off/low/high per turn"}
+  reasoning_low: {type: float, default: 0.5, description: "Reasoning score at or above which thinking turns on (low effort)"}
+  reasoning_high: {type: float, default: 1.4, description: "Reasoning score at or above which thinking uses high effort"}
+  action_gate: {type: bool, default: true, description: "Block tool calls Jev judges unrelated to the user's request"}
+  action_block_below: {type: float, default: 0.15, description: "Block when P(action serves the user's request) is below this"}
+  gated_tools:
+    type: list
+    default: [terminal, execute_code, write_file, patch, send_message, cronjob_manage, computer_use, browser_exec, browser_type, discord_admin, yb_send_dm, skill_manage]
+    description: "Tools whose calls Jev checks against the user's request"
