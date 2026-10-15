@@ -1,0 +1,16 @@
+name: jeeves_presence
+version: 0.1.0
+manifest_version: 2
+api_version: 1
+license: MIT
+description: "Streams what the agent is doing (turns, tools, replies, computer_use targets) to the Jeeves orb app over local UDP, and paces computer_use pointer actions so the orb's ghost cursor visibly reaches each target before the background input lands. Fire-and-forget: nothing changes when the app isn't running."
+author: AshtonVaughan
+tags: [presence, overlay, computer-use, macos]
+provides_hooks:
+  - pre_llm_call
+  - post_llm_call
+  - pre_api_request
+  - on_session_end
+config_schema:
+  port: {type: int, default: 47800, description: "UDP port the Jeeves app listens on (127.0.0.1)"}
+  cursor_lead_ms: {type: int, default: 420, description: "How long the ghost cursor gets to reach a target before the click is sent"}

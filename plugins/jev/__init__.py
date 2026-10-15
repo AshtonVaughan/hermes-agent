@@ -40,6 +40,8 @@ _latest_by_session: dict[str, str] = {}
 _verdicts: OrderedDict[tuple, float] = OrderedDict()
 _clients: dict[tuple[str, str], Any] = {}
 _settings = Settings()
+# computer_use actions with no side effects: judging them would only add latency.
+_READ_ONLY_COMPUTER_ACTIONS = frozenset({"capture", "list_apps", "list_windows", "wait"})
 
 
 # ── state ────────────────────────────────────────────────────────────────────
@@ -203,6 +205,8 @@ def on_pre_tool_call(
 ) -> dict[str, str] | None:
     try:
         if not _settings.action_gate or tool_name not in _settings.gated_tools:
+            return None
+        if tool_name == "computer_use" and (args or {}).get("action") in _READ_ONLY_COMPUTER_ACTIONS:
             return None
         plan = _plan_for(turn_id, session_id)
         client = _client()
